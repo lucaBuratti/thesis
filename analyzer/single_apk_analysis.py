@@ -1,17 +1,22 @@
-"""Bho"""
 from androguard.core.bytecodes import apk
+from androguard.core.bytecodes import dvm
 import os
-PATH = "/home/luca/dev/AdwareSamples/adware/com.AlolasJJ.jzcompass-5.1.4-154a86b1e4b5ece4be5bfa6ef4ed3047.apk"
+import copy
+
+data_dictionary = {
+        "apk_name" : None,
+        "num_activities" : None,
+        "permissions" : [],
+        "libraries" : []}
 
 def get_data(path):
-    """Analyze and return data regarding the apk specified in the parameter path
-        the output record is a list of tuples
-        [(name,value), (name2,value2)...] """
+    """Analyze and return data regarding the apk specified in the parameter path.
+        the output record is a data_dictionary"""
     a = apk.APK(path)
-    out_record = [("apk_name", os.path.basename(path))]
-    out_record.append(("num_activities", len(a.get_activities())))
-    out_record.append(("permissions", a.get_permissions()))
-
+    d = dvm.DalvikVMFormat(a.get_dex())
+    out_record = copy.deepcopy(data_dictionary)
+    out_record["apk_name"] = os.path.basename(path)
+    out_record["num_activities"] = len(a.get_activities())
+    out_record["permissions"] = list(set(a.get_permissions()))
+    out_record["libraries"] = list(set(a.get_libraries()))
     return out_record
-
-print get_data(PATH)
